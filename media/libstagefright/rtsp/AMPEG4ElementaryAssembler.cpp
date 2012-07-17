@@ -250,10 +250,21 @@ ARTPAssembler::AssemblyStatus AMPEG4ElementaryAssembler::addPacket(
     } else {
         // hexdump(buffer->data(), buffer->size());
 
-        CHECK_GE(buffer->size(), 2u);
+        if (buffer->size() < 2) {
+            ALOGV("Buffer size smaller than expected (%d)", buffer->size());
+            queue->erase(queue->begin());
+            ++mNextExpectedSeqNo;
+            return MALFORMED_PACKET;
+        }
+
         unsigned AU_headers_length = U16_AT(buffer->data());  // in bits
 
-        CHECK_GE(buffer->size(), 2 + (AU_headers_length + 7) / 8);
+        if (buffer->size() < (2 + (AU_headers_length + 7) / 8)) {
+            ALOGV("Buffer size smaller than expected (%d, %u)", buffer->size(), AU_headers_length);
+            queue->erase(queue->begin());
+            ++mNextExpectedSeqNo;
+            return MALFORMED_PACKET;
+        }
 
         List<AUHeader> headers;
 
@@ -342,7 +353,12 @@ ARTPAssembler::AssemblyStatus AMPEG4ElementaryAssembler::addPacket(
              it != headers.end(); ++it) {
             const AUHeader &header = *it;
 
-            CHECK_LE(offset + header.mSize, buffer->size());
+            if ((offset + header.mSize) > buffer->size()) {
+                ALOGV("Error offset > size (%d + %d > %d)", offset, header.mSize, buffer->size());
+                queue->erase(queue->begin());
+                ++mNextExpectedSeqNo;
+                return MALFORMED_PACKET;
+             }
 
             sp<ABuffer> accessUnit = new ABuffer(header.mSize);
             memcpy(accessUnit->data(), buffer->data() + offset, header.mSize);
