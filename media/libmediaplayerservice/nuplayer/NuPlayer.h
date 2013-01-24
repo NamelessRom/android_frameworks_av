@@ -148,6 +148,7 @@ private:
 
     FlushStatus mFlushingAudio;
     FlushStatus mFlushingVideo;
+    bool mVideoSkipToIFrame;
 
     int64_t mSkipRenderingAudioUntilMediaTimeUs;
     int64_t mSkipRenderingVideoUntilMediaTimeUs;
