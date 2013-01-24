@@ -419,6 +419,22 @@ bool IsAVCReferenceFrame(const sp<ABuffer> &accessUnit) {
     return true;
 }
 
+bool IsSPS(const sp<ABuffer> &accessUnit) {
+    const uint8_t *data = accessUnit->data();
+    size_t size = accessUnit->size();
+
+    const uint8_t *nalStart;
+    size_t nalSize;
+    while (getNextNALUnit(&data, &size, &nalStart, &nalSize, true) == OK) {
+        CHECK_GT(nalSize, 0u);
+
+        unsigned nalType = nalStart[0] & 0x1f;
+        return (nalType == 7);
+    }
+
+    return false;
+}
+
 sp<MetaData> MakeAACCodecSpecificData(
         unsigned profile, unsigned sampling_freq_index,
         unsigned channel_configuration) {
