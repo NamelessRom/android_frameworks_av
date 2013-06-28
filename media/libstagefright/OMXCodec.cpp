@@ -5641,7 +5641,11 @@ status_t QueryCodec(
     // prefix "flexible" standard ones with the flexible equivalent
     OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
     InitOMXParams(&portFormat);
+#ifdef OMAP_ENHANCEMENT
+    portFormat.nPortIndex = !isEncoder ? 0 : 1;
+#else
     portFormat.nPortIndex = !isEncoder ? 1 : 0;
+#endif
     for (OMX_U32 index = 0;;index++)  {
         portFormat.nIndex = index;
         err = omx->getParameter(
