@@ -86,6 +86,10 @@ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
     endif
 endif
 
+ifeq ($(TARGET_USE_OMAP_COMPAT),true)
+    LOCAL_CFLAGS += -DUSE_OMX_COMPAT
+endif
+
 # for <cutils/atomic-inline.h>
 LOCAL_CFLAGS += -DANDROID_SMP=$(if $(findstring true,$(TARGET_CPU_SMP)),1,0)
 LOCAL_SRC_FILES += SingleStateQueue.cpp
