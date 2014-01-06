@@ -225,7 +225,10 @@ status_t NuPlayerDriver::start() {
         }
 
         case STATE_RUNNING:
+        {
+            mAtEOS = false;
             break;
+        }
 
         case STATE_PAUSED:
         {
