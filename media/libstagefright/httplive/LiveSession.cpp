@@ -1258,6 +1258,7 @@ void LiveSession::onChangeConfiguration3(const sp<AMessage> &msg) {
     // All fetchers have now been started, the configuration change
     // has completed.
 
+    mCheckBandwidthGeneration++;
     scheduleCheckBandwidthEvent();
 
     ALOGV("XXX configuration change completed.");
@@ -1375,6 +1376,7 @@ void LiveSession::onCheckBandwidth() {
     // This ensures that only one configuration change is ongoing at any
     // one time, once that completes it'll schedule another check bandwidth
     // event.
+    scheduleCheckBandwidthEvent();
 }
 
 void LiveSession::postPrepared(status_t err) {
