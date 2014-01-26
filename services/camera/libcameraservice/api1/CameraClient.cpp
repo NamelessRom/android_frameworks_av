@@ -90,7 +90,7 @@ status_t CameraClient::initialize(camera_module_t *module) {
     // Enable zoom, error, focus, and metadata messages by default
     enableMsgType(CAMERA_MSG_ERROR | CAMERA_MSG_ZOOM | CAMERA_MSG_FOCUS
 #ifndef CAMERA_MSG_MGMT
-                  | CAMERA_MSG_PREVIEW_METADATA 
+                  | CAMERA_MSG_PREVIEW_METADATA
 #endif
 #ifndef OMAP_ICS_CAMERA
                   | CAMERA_MSG_FOCUS_MOVE
@@ -1006,7 +1006,11 @@ void CameraClient::handleCompressedBurstPicture(const sp<IMemory>& mem) {
     // get called only once. When burst finishes this message will get automatically
     // disabled in the respective call for restarting the preview.
 
+#ifndef CAMERA_LEGACY_HACK
     sp<ICameraClient> c = mCameraClient;
+#else
+    sp<ICameraClient> c = mRemoteCallback;
+#endif
     mLock.unlock();
     if (c != 0) {
         c->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem, NULL);
