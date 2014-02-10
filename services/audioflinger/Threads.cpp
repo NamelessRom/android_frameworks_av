@@ -1686,8 +1686,11 @@ void AudioFlinger::PlaybackThread::resetWriteBlocked(uint32_t sequence)
     // reject out of sequence requests
     if ((mWriteAckSequence & 1) && (sequence == mWriteAckSequence)) {
         mWriteAckSequence &= ~1;
+        ALOGD("copl(%d): write_ready, signal offload thread", mId);
         mWaitWorkCV.signal();
-    }
+    } else ALOGD("copl(%d):reject out of sequence requests(write_ready) (%x %x)",
+         mId, mWriteAckSequence, sequence);
+
 }
 
 void AudioFlinger::PlaybackThread::resetDraining(uint32_t sequence)
@@ -1696,8 +1699,10 @@ void AudioFlinger::PlaybackThread::resetDraining(uint32_t sequence)
     // reject out of sequence requests
     if ((mDrainSequence & 1) && (sequence == mDrainSequence)) {
         mDrainSequence &= ~1;
+        ALOGD("copl(%d): drain_ready, signal offload thread", mId);
         mWaitWorkCV.signal();
-    }
+    } else ALOGD("copl(%d):reject out of sequence requests(drain_ready) (%x %x)",
+        mId, mDrainSequence, sequence);
 }
 
 // static
@@ -1706,12 +1711,14 @@ int AudioFlinger::PlaybackThread::asyncCallback(stream_callback_event_t event,
                                                 void *cookie)
 {
     AudioFlinger::PlaybackThread *me = (AudioFlinger::PlaybackThread *)cookie;
-    ALOGV("asyncCallback() event %d", event);
+
     switch (event) {
     case STREAM_CBK_EVENT_WRITE_READY:
+        ALOGD("copl:STREAM_CBK_EVENT_WRITE_READY received from hal");
         me->writeCallback();
         break;
     case STREAM_CBK_EVENT_DRAIN_READY:
+        ALOGD("copl:STREAM_CBK_EVENT_DRAIN_READY received from hal");
         me->drainCallback();
         break;
     default:
@@ -2035,6 +2042,8 @@ ssize_t AudioFlinger::PlaybackThread::threadLoop_write()
             ALOG_ASSERT(mCallbackThread != 0);
             mCallbackThread->setWriteBlocked(mWriteAckSequence);
         }
+        else ALOGD("copl(%d):not a full write, wait for write_ready callback (%d)",
+            mId, bytesWritten);
     }
 
     mNumWrites++;
@@ -2047,7 +2056,8 @@ void AudioFlinger::PlaybackThread::threadLoop_drain()
 {
 #ifndef AUDIO_LEGACY_HACK
     if (mOutput->stream->drain) {
-        ALOGV("draining %s", (mMixerStatus == MIXER_DRAIN_TRACK) ? "early" : "full");
+        ALOGD("copl(%d):draining %s", mId,
+            (mMixerStatus == MIXER_DRAIN_TRACK) ? "early" : "full");
         if (mUseAsyncWrite) {
             ALOGW_IF(mDrainSequence & 1, "threadLoop_drain(): out of sequence drain request");
             mDrainSequence |= 1;
@@ -4246,7 +4256,8 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::OffloadThread::prepareTr
                 if (mBytesRemaining == 0) {
                     // Only start draining when all data in mixbuffer
                     // has been written
-                    ALOGV("OffloadThread: underrun and STOPPING_1 -> draining, STOPPING_2");
+                    ALOGD("copl(%d):OffloadThread: track stopped, trigger early drain",
+                        mId);
                     track->mState = TrackBase::STOPPING_2; // so presentation completes after drain
                     // do not drain if no data was ever sent to HAL (mStandby == true)
                     if (last && !mStandby) {
@@ -4303,6 +4314,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::OffloadThread::prepareTr
     // if resume is received before pause is executed.
 #ifndef AUDIO_LEGACY_HACK
     if (!mStandby && (doHwPause || (mFlushPending && !mHwPaused && (count != 0)))) {
+        ALOGD("copl(%d):pause hal", mId);
         mOutput->stream->pause(mOutput->stream);
         if (!doHwPause) {
             doHwResume = true;
@@ -4313,6 +4325,7 @@ AudioFlinger::PlaybackThread::mixer_state AudioFlinger::OffloadThread::prepareTr
         mFlushPending = false;
     }
     if (!mStandby && doHwResume) {
+        ALOGD("copl(%d):resume hal", mId);
         mOutput->stream->resume(mOutput->stream);
     }
 #endif
@@ -4363,6 +4376,7 @@ bool AudioFlinger::OffloadThread::waitingAsyncCallback()
 void AudioFlinger::OffloadThread::flushHw_l()
 {
 #ifndef AUDIO_LEGACY_HACK
+    ALOGD("copl(%d): flush hal", mId);
     mOutput->stream->flush(mOutput->stream);
 #endif
     // Flush anything still waiting in the mixbuffer
