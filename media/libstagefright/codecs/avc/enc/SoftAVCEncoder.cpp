@@ -181,7 +181,7 @@ SoftAVCEncoder::SoftAVCEncoder(
       mStoreMetaDataInBuffers(false),
       mIDRFrameRefreshIntervalInSec(1),
       mAVCEncProfile(AVC_BASELINE),
-      mAVCEncLevel(AVC_LEVEL2),
+      mAVCEncLevel(AVC_LEVEL_AUTO),
       mNumInputFrames(-1),
       mPrevTimestampUs(-1),
       mStarted(false),
@@ -487,8 +487,9 @@ OMX_ERRORTYPE SoftAVCEncoder::internalGetParameter(
             }
 
             avcParams->eProfile = OMX_VIDEO_AVCProfileBaseline;
-            OMX_U32 omxLevel = AVC_LEVEL2;
-            if (OMX_ErrorNone !=
+            OMX_U32 omxLevel = 0; // Indicate that no level is set
+            if (mAVCEncLevel != AVC_LEVEL_AUTO &&
+                OMX_ErrorNone !=
                 ConvertAvcSpecLevelToOmxAvcLevel(mAVCEncLevel, &omxLevel)) {
                 return OMX_ErrorUndefined;
             }
@@ -674,7 +675,8 @@ OMX_ERRORTYPE SoftAVCEncoder::internalSetParameter(
                 return OMX_ErrorUndefined;
             }
 
-            if (OK != ConvertOmxAvcLevelToAvcSpecLevel(avcType->eLevel, &mAVCEncLevel)) {
+            if (avcType->eLevel > 0 &&
+                OK != ConvertOmxAvcLevelToAvcSpecLevel(avcType->eLevel, &mAVCEncLevel)) {
                 return OMX_ErrorUndefined;
             }
 
