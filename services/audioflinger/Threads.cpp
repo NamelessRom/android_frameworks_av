@@ -4122,7 +4122,9 @@ void AudioFlinger::OffloadThread::threadLoop_exit()
 #ifndef AUDIO_LEGACY_HACK
     }
 #endif
-    mCallbackThread->exit();
+    if (mCallbackThread != NULL) {
+        mCallbackThread->exit();
+    }
     PlaybackThread::threadLoop_exit();
 }
 
