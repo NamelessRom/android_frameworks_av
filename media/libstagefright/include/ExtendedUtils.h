@@ -107,6 +107,10 @@ struct ExtendedUtils {
         static bool isSmoothStreamingEnabled();
 
         static int64_t getMaxAVSyncLateMargin();
+
+        static bool isCustomAVSyncEnabled();
+
+        static bool isMpeg4DPSupportedByHardware();
     };
 
     //set B frames for MPEG4
