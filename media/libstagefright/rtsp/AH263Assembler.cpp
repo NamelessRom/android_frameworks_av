@@ -106,31 +106,6 @@ ARTPAssembler::AssemblyStatus AH263Assembler::addPacket(
     unsigned P = (payloadHeader >> 10) & 1;
     unsigned V = (payloadHeader >> 9) & 1;
     unsigned PLEN = (payloadHeader >> 3) & 0x3f;
-    unsigned PEBIT = payloadHeader & 7;
-
-    // V=0
-    if (V != 0u) {
-        queue->erase(queue->begin());
-        ++mNextExpectedSeqNo;
-        ALOGW("Packet discarded due to VRC (V != 0)");
-        return MALFORMED_PACKET;
-    }
-
-    // PLEN=0
-    if (PLEN != 0u) {
-        queue->erase(queue->begin());
-        ++mNextExpectedSeqNo;
-        ALOGW("Packet discarded (PLEN != 0)");
-        return MALFORMED_PACKET;
-    }
-
-    // PEBIT=0
-    if (PEBIT != 0u) {
-        queue->erase(queue->begin());
-        ++mNextExpectedSeqNo;
-        ALOGW("Packet discarded (PEBIT != 0)");
-        return MALFORMED_PACKET;
-    }
 
     size_t skip = V + PLEN + (P ? 0 : 2);
 
