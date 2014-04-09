@@ -821,10 +821,15 @@ void AudioSystem::clearAudioConfigCache()
 
 bool AudioSystem::isOffloadSupported(const audio_offload_info_t& info)
 {
+#ifndef OLD_TEGRA
     ALOGV("isOffloadSupported()");
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return false;
     return aps->isOffloadSupported(info);
+#else
+    ALOGV("isOffloadSupported() non existent in ICS, false");
+    return false;
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -836,7 +841,7 @@ void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who) {
     ALOGW("AudioPolicyService server died!");
 }
 
-#ifdef USE_SAMSUNG_SEPARATEDSTREAM
+#if defined (USE_SAMSUNG_SEPARATEDSTREAM) || defined (OLD_TEGRA)
 extern "C" bool _ZN7android11AudioSystem17isSeparatedStreamE19audio_stream_type_t(audio_stream_type_t stream)
 {
     ALOGD("audio_stream_type_t: %d", stream);
