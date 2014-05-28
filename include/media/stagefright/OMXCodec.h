@@ -183,6 +183,8 @@ private:
         size_t mSize;
         void *mData;
         MediaBuffer *mMediaBuffer;
+        OMX_U8 *mAllocatedBuffer;
+        OMX_U32 mAllocatedSize;
         bool mOutputCropChanged;
     };
 
