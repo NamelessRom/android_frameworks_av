@@ -23,6 +23,11 @@
 #include <media/stagefright/MediaErrors.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
+#ifdef SEMC_ICS_CAMERA_BLOB
+#include <binder/IMemory.h>
+#include <binder/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
+#endif
 
 namespace android {
 
@@ -59,6 +64,15 @@ struct MediaSource : public virtual RefBase {
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL) = 0;
 
+<<<<<<< HEAD
+=======
+    virtual void notifyError(status_t err) {}
+
+#ifdef SEMC_ICS_CAMERA_BLOB
+    virtual status_t getRecordingBuffer(unsigned int index, sp<MemoryBase>** buffer);
+#endif
+
+>>>>>>> c1f0b13... libstagefright: Allow using camera recording buffer as input for encoder
     // Options that modify read() behaviour. The default is to
     // a) not request a seek
     // b) not be late, i.e. lateness_us = 0
