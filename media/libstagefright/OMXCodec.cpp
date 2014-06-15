@@ -2861,11 +2861,8 @@ void OMXCodec::on_message(const omx_message &msg) {
                 }
                 mFilledBuffers.push_back(i);
                 mBufferFilled.signal();
-
-                if (!strncasecmp(mMIME, "video/", 6)) {
-                    ATRACE_INT("Output buffers with OMXCodec", mFilledBuffers.size());
-                    ATRACE_INT("Output Buffers with OMX client",
-                            countBuffersWeOwn(mPortBuffers[kPortIndexOutput]));
+                if (mIsEncoder) {
+                    sched_yield();
                 }
             }
 
