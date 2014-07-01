@@ -988,12 +988,6 @@ status_t AudioTrack::getPosition(uint32_t *position) const
     if (isOffloaded()) {
         uint32_t dspFrames = 0;
 
-        if ((mState == STATE_PAUSED) || (mState == STATE_PAUSED_STOPPING)) {
-            ALOGV("getPosition called in paused state, return cached position %u", mPausedPosition);
-            *position = mPausedPosition;
-            return NO_ERROR;
-        }
-
         if (mOutput != 0) {
             uint32_t halFrames;
             AudioSystem::getRenderPosition(mOutput, &halFrames, &dspFrames);
@@ -1786,6 +1780,7 @@ nsecs_t AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
                 }
             }
 
+            mLock.unlock();
             mCbf(EVENT_STREAM_END, mUserData, NULL);
             {
                 AutoMutex lock(mLock);
@@ -2145,7 +2140,7 @@ void AudioTrack::DirectClient::notify(int msg) {
 
 AudioTrack::AudioTrackThread::AudioTrackThread(AudioTrack& receiver, bool bCanCallJava)
     : Thread(bCanCallJava), mReceiver(receiver), mPaused(true), mPausedInt(false), mPausedNs(0LL),
-      mIgnoreNextPausedInt(false), mCmdAckPending(false)
+      mIgnoreNextPausedInt(false)
 {
 }
 
@@ -2158,10 +2153,6 @@ bool AudioTrack::AudioTrackThread::threadLoop()
     {
         AutoMutex _l(mMyLock);
         if (mPaused) {
-            if (mCmdAckPending) {
-                mCmdAckPending = false;
-                mCmdAck.signal();
-            }
             mMyCond.wait(mMyLock);
             // caller will check for exitPending()
             return true;
@@ -2171,10 +2162,6 @@ bool AudioTrack::AudioTrackThread::threadLoop()
             mPausedInt = false;
         }
         if (mPausedInt) {
-            if (mCmdAckPending) {
-                mCmdAckPending = false;
-                mCmdAck.signal();
-            }
             if (mPausedNs > 0) {
                 (void) mMyCond.waitRelative(mMyLock, mPausedNs);
             } else {
@@ -2217,24 +2204,10 @@ void AudioTrack::AudioTrackThread::pause()
     mPaused = true;
 }
 
-void AudioTrack::AudioTrackThread::pauseSync()
-{
-    AutoMutex _l(mMyLock);
-    if (mPaused || mPausedInt)
-        return;
-
-    mPaused = true;
-    mCmdAckPending = true;
-    while (!mCmdAckPending) {
-        mCmdAck.wait(mMyLock);
-    }
-}
-
 void AudioTrack::AudioTrackThread::resume()
 {
     AutoMutex _l(mMyLock);
     mIgnoreNextPausedInt = true;
-    mCmdAckPending = false;
     if (mPaused || mPausedInt) {
         mPaused = false;
         mPausedInt = false;
