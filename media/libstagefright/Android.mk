@@ -206,9 +206,7 @@ endif
 
 # Include native color format header path
 LOCAL_C_INCLUDES += \
-	$(TOP)/hardware/samsung/exynos4/hal/include \
-	$(TOP)/hardware/samsung/exynos4/include
-
+	$(TOP)/$(TARGET_HAL_PATH)/include
 
 ifeq ($(BOARD_USE_TI_DUCATI_H264_PROFILE), true)
 LOCAL_CFLAGS += -DUSE_TI_DUCATI_H264_PROFILE
