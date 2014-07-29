@@ -96,7 +96,6 @@ private:
 
     int64_t mPositionTimeMediaUs;
     int64_t mPositionTimeRealUs;
-    int64_t mDurationUs;
 
     bool mSeeking;
     bool mReachedEOS;
