@@ -122,7 +122,7 @@ endif
 endif
 endif
 
-ifeq ($(TARGET_BOARD_PLATFORM),omap4)
+ifeq ($(TARGET_BOARD_PLATFORM),$(filter $(TARGET_BOARD_PLATFORM),omap4 exynos4))
 LOCAL_CFLAGS := -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
 endif
 
