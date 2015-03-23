@@ -5679,10 +5679,12 @@ status_t QueryCodec(
     OMX_VIDEO_PARAM_PORTFORMATTYPE portFormat;
     InitOMXParams(&portFormat);
 #ifdef OMAP_ENHANCEMENT
-    portFormat.nPortIndex = !isEncoder ? 0 : 1;
-#else
-    portFormat.nPortIndex = !isEncoder ? 1 : 0;
+    if(!IsSoftwareCodec(componentName))
+        portFormat.nPortIndex = !isEncoder ? 0 : 1;
+    else
 #endif
+    portFormat.nPortIndex = !isEncoder ? 1 : 0;
+
     for (OMX_U32 index = 0;;index++)  {
         portFormat.nIndex = index;
         err = omx->getParameter(
