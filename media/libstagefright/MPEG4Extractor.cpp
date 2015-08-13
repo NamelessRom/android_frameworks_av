@@ -3064,10 +3064,15 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     };
 
     ABitReader br(csd, csd_size);
-    uint32_t objectType = br.getBits(5);
+    uint32_t objectType;
+    if (!br.getBits(5, &objectType))
+        return ERROR_MALFORMED;
 
     if (objectType == 31) {  // AAC-ELD => additional 6 bits
-        objectType = 32 + br.getBits(6);
+        uint32_t tmp;
+        if (!br.getBits(6, &tmp))
+            return ERROR_MALFORMED;
+        objectType = 32 + tmp;
     }
 
     if (mLastTrack == NULL)
@@ -3076,18 +3081,23 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     //keep AOT type
     mLastTrack->meta->setInt32(kKeyAACAOT, objectType);
 
-    uint32_t freqIndex = br.getBits(4);
+    uint32_t freqIndex;
+    if (!br.getBits(4, &freqIndex))
+        return ERROR_MALFORMED;
 
-    int32_t sampleRate = 0;
-    int32_t numChannels = 0;
+    uint32_t sampleRate = 0;
+    uint32_t numChannels = 0;
     if (freqIndex == 15) {
         if (csd_size < 5) {
             return ERROR_MALFORMED;
         }
-        sampleRate = br.getBits(24);
-        numChannels = br.getBits(4);
+        if (!br.getBits(24, &sampleRate))
+            return ERROR_MALFORMED;
+        if (!br.getBits(4, &numChannels))
+            return ERROR_MALFORMED;
     } else {
-        numChannels = br.getBits(4);
+        if (!br.getBits(4, &numChannels))
+            return ERROR_MALFORMED;
 
         if (freqIndex == 13 || freqIndex == 14) {
             return ERROR_MALFORMED;
@@ -3097,13 +3107,17 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
     }
 
     if (objectType == AOT_SBR || objectType == AOT_PS) {//SBR specific config per 14496-3 table 1.13
-        uint32_t extFreqIndex = br.getBits(4);
-        int32_t extSampleRate __unused;
+        uint32_t extFreqIndex;
+        if (!br.getBits(4, &extFreqIndex))
+            return ERROR_MALFORMED;
+
+        uint32_t extSampleRate;
         if (extFreqIndex == 15) {
             if (csd_size < 8) {
                 return ERROR_MALFORMED;
             }
-            extSampleRate = br.getBits(24);
+            if (!br.getBits(24, &extSampleRate))
+                return ERROR_MALFORMED;
         } else {
             if (extFreqIndex == 13 || extFreqIndex == 14) {
                 return ERROR_MALFORMED;
@@ -3139,26 +3153,37 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
 
     {
         if (objectType == AOT_SBR || objectType == AOT_PS) {
-            objectType = br.getBits(5);
+            if (!br.getBits(5, &objectType))
+                return ERROR_MALFORMED;
 
             if (objectType == AOT_ESCAPE) {
-                objectType = 32 + br.getBits(6);
+                uint32_t tmp;
+                if (!br.getBits(6, &tmp))
+                    return ERROR_MALFORMED;
+                objectType = 32 + tmp;
             }
         }
         if (objectType == AOT_AAC_LC || objectType == AOT_ER_AAC_LC ||
                 objectType == AOT_ER_AAC_LD || objectType == AOT_ER_AAC_SCAL ||
                 objectType == AOT_ER_BSAC) {
-            const int32_t frameLengthFlag __unused = br.getBits(1);
+            uint32_t frameLengthFlag;
+            if (!br.getBits(1, &frameLengthFlag))
+                return ERROR_MALFORMED;
 
-            const int32_t dependsOnCoreCoder = br.getBits(1);
+            uint32_t dependsOnCoreCoder;
+            if (!br.getBits(1, &dependsOnCoreCoder))
+                return ERROR_MALFORMED;
 
-            if (dependsOnCoreCoder ) {
-                const int32_t coreCoderDelay __unused = br.getBits(14);
+            if (dependsOnCoreCoder) {
+                uint32_t coreCoderDelay;
+                if (!br.getBits(14, &coreCoderDelay))
+                    return ERROR_MALFORMED;
             }
 
-            int32_t extensionFlag = -1;
+            uint32_t extensionFlag = -1;
             if (br.numBitsLeft() > 0) {
-                extensionFlag = br.getBits(1);
+                if (!br.getBits(1, &extensionFlag))
+                    return ERROR_MALFORMED;
             } else {
                 switch (objectType) {
                 // 14496-3 4.5.1.1 extensionFlag
@@ -3182,54 +3207,100 @@ status_t MPEG4Extractor::updateAudioTrackInfoFromESDS_MPEG4Audio(
             if (numChannels == 0 && (br.numBitsLeft() > 0)) {
                 int32_t channelsEffectiveNum = 0;
                 int32_t channelsNum = 0;
-                const int32_t ElementInstanceTag __unused = br.getBits(4);
-                const int32_t Profile __unused = br.getBits(2);
-                const int32_t SamplingFrequencyIndex __unused = br.getBits(4);
-                const int32_t NumFrontChannelElements = br.getBits(4);
-                const int32_t NumSideChannelElements = br.getBits(4);
-                const int32_t NumBackChannelElements = br.getBits(4);
-                const int32_t NumLfeChannelElements = br.getBits(2);
-                const int32_t NumAssocDataElements __unused = br.getBits(3);
-                const int32_t NumValidCcElements __unused = br.getBits(4);
+                uint32_t ElementInstanceTag;
+                if (!br.getBits(4, &ElementInstanceTag))
+                    return ERROR_MALFORMED;
+                uint32_t Profile;
+                if (!br.getBits(2, &Profile))
+                    return ERROR_MALFORMED;
+                uint32_t SamplingFrequencyIndex;
+                if (!br.getBits(4, &SamplingFrequencyIndex))
+                    return ERROR_MALFORMED;
+                uint32_t NumFrontChannelElements;
+                if (!br.getBits(4, &NumFrontChannelElements))
+                    return ERROR_MALFORMED;
+                uint32_t NumSideChannelElements;
+                if (!br.getBits(4, &NumSideChannelElements))
+                    return ERROR_MALFORMED;
+                uint32_t NumBackChannelElements;
+                if (!br.getBits(4, &NumBackChannelElements))
+                    return ERROR_MALFORMED;
+                uint32_t NumLfeChannelElements;
+                if (!br.getBits(2, &NumLfeChannelElements))
+                    return ERROR_MALFORMED;
+                uint32_t NumAssocDataElements;
+                if (!br.getBits(3, &NumAssocDataElements))
+                    return ERROR_MALFORMED;
+                uint32_t NumValidCcElements;
+                if (!br.getBits(4, &NumValidCcElements))
+                    return ERROR_MALFORMED;
 
-                const int32_t MonoMixdownPresent = br.getBits(1);
+                uint32_t MonoMixdownPresent;
+                if (!br.getBits(1, &MonoMixdownPresent))
+                    return ERROR_MALFORMED;
                 if (MonoMixdownPresent != 0) {
-                    const int32_t MonoMixdownElementNumber __unused = br.getBits(4);
+                    uint32_t MonoMixdownElementNumber;
+                    if (!br.getBits(4, &MonoMixdownElementNumber))
+                        return ERROR_MALFORMED;
                 }
 
-                const int32_t StereoMixdownPresent = br.getBits(1);
+                uint32_t StereoMixdownPresent;
+                if (!br.getBits(1, &StereoMixdownPresent))
+                    return ERROR_MALFORMED;
                 if (StereoMixdownPresent != 0) {
-                    const int32_t StereoMixdownElementNumber __unused = br.getBits(4);
+                    uint32_t StereoMixdownElementNumber;
+                    if (!br.getBits(4, &StereoMixdownElementNumber))
+                        return ERROR_MALFORMED;
                 }
 
-                const int32_t MatrixMixdownIndexPresent = br.getBits(1);
+                uint32_t MatrixMixdownIndexPresent;
+                if (!br.getBits(1, &MatrixMixdownIndexPresent))
+                    return ERROR_MALFORMED;
                 if (MatrixMixdownIndexPresent != 0) {
-                    const int32_t MatrixMixdownIndex __unused = br.getBits(2);
-                    const int32_t PseudoSurroundEnable __unused = br.getBits(1);
+                    uint32_t MatrixMixdownIndex;
+                    if (!br.getBits(2, &MatrixMixdownIndex))
+                        return ERROR_MALFORMED;
+                    uint32_t PseudoSurroundEnable;
+                    if (!br.getBits(1, &PseudoSurroundEnable))
+                        return ERROR_MALFORMED;
                 }
 
-                int i;
+                uint32_t i;
                 for (i=0; i < NumFrontChannelElements; i++) {
-                    const int32_t FrontElementIsCpe = br.getBits(1);
-                    const int32_t FrontElementTagSelect __unused = br.getBits(4);
+                    uint32_t FrontElementIsCpe;
+                    if (!br.getBits(1, &FrontElementIsCpe))
+                        return ERROR_MALFORMED;
+                    uint32_t FrontElementTagSelect;
+                    if (!br.getBits(4, &FrontElementTagSelect))
+                        return ERROR_MALFORMED;
                     channelsNum += FrontElementIsCpe ? 2 : 1;
                 }
 
                 for (i=0; i < NumSideChannelElements; i++) {
-                    const int32_t SideElementIsCpe = br.getBits(1);
-                    const int32_t SideElementTagSelect __unused = br.getBits(4);
+                    uint32_t SideElementIsCpe;
+                    if (!br.getBits(1, &SideElementIsCpe))
+                        return ERROR_MALFORMED;
+                    uint32_t SideElementTagSelect;
+                    if (!br.getBits(4, &SideElementTagSelect))
+                        return ERROR_MALFORMED;
                     channelsNum += SideElementIsCpe ? 2 : 1;
                 }
 
                 for (i=0; i < NumBackChannelElements; i++) {
-                    const int32_t BackElementIsCpe = br.getBits(1);
-                    const int32_t BackElementTagSelect __unused = br.getBits(4);
+                    uint32_t BackElementIsCpe;
+                    if (!br.getBits(1, &BackElementIsCpe))
+                        return ERROR_MALFORMED;
+                    uint32_t BackElementTagSelect;
+                    if (!br.getBits(4, &BackElementTagSelect))
+                        return ERROR_MALFORMED;
                     channelsNum += BackElementIsCpe ? 2 : 1;
                 }
                 channelsEffectiveNum = channelsNum;
 
                 for (i=0; i < NumLfeChannelElements; i++) {
-                    const int32_t LfeElementTagSelect __unused = br.getBits(4);
+                    uint32_t LfeElementTagSelect;
+                    if (!br.getBits(4, &LfeElementTagSelect))
+                        return ERROR_MALFORMED;
                     channelsNum += 1;
                 }
                 ALOGV("mpeg4 audio channelsNum = %d", channelsNum);

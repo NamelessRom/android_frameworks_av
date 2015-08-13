@@ -30,7 +30,7 @@ public:
     ABitReader(const uint8_t *data, size_t size);
     virtual ~ABitReader();
 
-    uint32_t getBits(size_t n);
+    bool getBits(size_t n, uint32_t *pout);
     void skipBits(size_t n);
 
     void putBits(uint32_t x, size_t n);
@@ -46,7 +46,7 @@ protected:
     uint32_t mReservoir;  // left-aligned bits
     size_t mNumBitsLeft;
 
-    virtual void fillReservoir();
+    virtual bool fillReservoir();
 
     DISALLOW_EVIL_CONSTRUCTORS(ABitReader);
 };
@@ -60,7 +60,7 @@ public:
 private:
     int32_t mNumZeros;
 
-    virtual void fillReservoir();
+    virtual bool fillReservoir();
 
     DISALLOW_EVIL_CONSTRUCTORS(NALBitReader);
 };
