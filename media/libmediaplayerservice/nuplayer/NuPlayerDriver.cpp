@@ -673,7 +673,8 @@ void NuPlayerDriver::notifyListener_l(
                     // The renderer has stopped the sink at the end in order to play out
                     // the last little bit of audio. If we're looping, we need to restart it.
                     mPlayer->startAudioSink();
-                    break;
+                    // don't send completion event when looping
+                    return;
                 }
 
                 mPlayer->pause();
