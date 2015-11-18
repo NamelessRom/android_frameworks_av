@@ -1117,6 +1117,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 int32_t reason;
                 CHECK(msg->findInt32("reason", &reason));
                 ALOGV("Tear down audio with reason %d.", reason);
+                mAudioDecoder->pause();
                 performTearDown(msg);
             }
             break;
