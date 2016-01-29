@@ -55,7 +55,7 @@ Visualizer::~Visualizer()
 {
     ALOGV("Visualizer::~Visualizer()");
     setEnabled(false);
-    setCaptureCallBack(NULL, NULL, 0, 0, true);
+    setCaptureCallBack(NULL, NULL, 0, 0);
 }
 
 status_t Visualizer::setEnabled(bool enabled)
@@ -103,14 +103,14 @@ void Visualizer::cancelCaptureCallBack()
 }
 
 status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t flags,
-        uint32_t rate, bool force)
+        uint32_t rate)
 {
     if (rate > CAPTURE_RATE_MAX) {
         return BAD_VALUE;
     }
     Mutex::Autolock _l(mCaptureLock);
 
-    if (force || mEnabled) {
+    if (mEnabled) {
         return INVALID_OPERATION;
     }
 
