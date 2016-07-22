@@ -62,6 +62,13 @@ CameraClient::CameraClient(const sp<CameraService>& cameraService,
     LOG1("CameraClient::CameraClient X (pid %d, id %d)", callingPid, cameraId);
 }
 
+class SecCameraCoreManager : public CameraHardwareInterface {
+    public:
+        /* Methods */
+        SecCameraCoreManager(const char *name);
+        ~SecCameraCoreManager();
+};
+
 status_t CameraClient::initialize(CameraModule *module) {
     int callingPid = getCallingPid();
     status_t res;
@@ -77,7 +84,11 @@ status_t CameraClient::initialize(CameraModule *module) {
     char camera_device_name[10];
     snprintf(camera_device_name, sizeof(camera_device_name), "%d", mCameraId);
 
-    mHardware = new CameraHardwareInterface(camera_device_name);
+    ALOGE("%s: javi before SecCameraCoreManager", __FUNCTION__);
+    mHardware = new SecCameraCoreManager(camera_device_name);
+    ALOGE("%s: javi after SecCameraCoreManager", __FUNCTION__);
+
+    //mHardware = new CameraHardwareInterface(camera_device_name);
     res = mHardware->initialize(module);
     if (res != OK) {
         ALOGE("%s: Camera %d: unable to initialize device: %s (%d)",

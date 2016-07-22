@@ -68,7 +68,8 @@ LOCAL_SHARED_LIBRARIES:= \
     libhardware \
     libsync \
     libcamera_metadata \
-    libjpeg
+    libjpeg \
+    libseccameracore
 
 LOCAL_C_INCLUDES += \
     system/media/camera/include \
