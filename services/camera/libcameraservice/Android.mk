@@ -70,6 +70,9 @@ LOCAL_SHARED_LIBRARIES:= \
     libcamera_metadata \
     libjpeg
 
+LOCAL_SHARED_LIBRARIES_arm := \
+    libseccameracore
+
 LOCAL_C_INCLUDES += \
     system/media/camera/include \
     system/media/private/camera/include \
