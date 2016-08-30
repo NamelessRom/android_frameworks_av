@@ -299,6 +299,16 @@ int CameraParameters::getInt(const char *key) const
     return strtol(v, 0, 0);
 }
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+long long CameraParameters::getInt64(const char *key) const
+{
+    const char *v = get(key);
+    if (v == 0)
+        return -1LL;
+    return strtoll(v, 0, 0);
+}
+#endif
+
 float CameraParameters::getFloat(const char *key) const
 {
     const char *v = get(key);

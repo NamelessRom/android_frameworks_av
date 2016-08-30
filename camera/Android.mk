@@ -64,6 +64,10 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
+ifeq ($(BOARD_USE_SAMSUNG_CAMERA_HARDWARE), true)
+LOCAL_CFLAGS += -DSAMSUNG_CAMERA_HARDWARE
+endif
+
 LOCAL_SRC_FILES := \
 	CameraParameters.cpp
 
