@@ -44,6 +44,11 @@ public:
             const sp<DataSource> &source, const char *mime = NULL,
             const uint32_t flags = 0, const sp<AMessage> *meta = NULL);
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+    static sp<MediaExtractor> Create(
+            const sp<DataSource> &source, const char *mime = NULL);
+#endif
+
     virtual size_t countTracks() = 0;
     virtual sp<MediaSource> getTrack(size_t index) = 0;
 

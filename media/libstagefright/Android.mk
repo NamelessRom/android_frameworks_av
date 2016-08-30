@@ -148,6 +148,10 @@ LOCAL_SHARED_LIBRARIES += \
 endif
 endif
 
+ifeq ($(BOARD_USE_SAMSUNG_CAMERA_HARDWARE), true)
+LOCAL_CFLAGS += -DSAMSUNG_CAMERA_HARDWARE
+endif
+
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_enc_common \
         libstagefright_avc_common \

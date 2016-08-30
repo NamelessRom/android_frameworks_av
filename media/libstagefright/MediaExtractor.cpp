@@ -152,4 +152,16 @@ sp<MediaExtractor> MediaExtractor::Create(
     return ret;
 }
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+// static
+sp<MediaExtractor> MediaExtractor::Create(
+        const sp<DataSource> &source, const char *mime) {
+
+    sp<MediaExtractor> ret;
+
+    ret = Create(source, mime, 0, NULL);
+    return ret;
+}
+#endif
+
 }  // namespace android

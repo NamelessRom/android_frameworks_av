@@ -1381,6 +1381,20 @@ status_t MPEG4Writer::setCaptureRate(float captureFps) {
     return OK;
 }
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+status_t MPEG4Writer::setRecordingModeData(int recordingMode) {
+    mRecordingMode = recordingMode;
+
+    return OK;
+}
+
+status_t MPEG4Writer::setAuthorData(int author) {
+    mAuthor = author;
+
+    return OK;
+}
+#endif
+
 void MPEG4Writer::write(const void *data, size_t size) {
     write(data, 1, size);
 }

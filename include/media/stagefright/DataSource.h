@@ -54,6 +54,16 @@ public:
             HTTPBase *httpSource = NULL,
             bool useExtendedCache = false);
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+    // Needed for S6
+    static sp<DataSource> CreateFromURI(
+                const sp<IMediaHTTPService> &httpService,
+                const char *uri,
+                const KeyedVector<String8, String8> *headers = NULL,
+                String8 *contentType = NULL,
+                HTTPBase *httpSource = NULL);
+#endif
+
     static sp<DataSource> CreateMediaHTTP(const sp<IMediaHTTPService> &httpService);
     static sp<DataSource> CreateFromIDataSource(const sp<IDataSource> &source);
 

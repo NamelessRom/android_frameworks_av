@@ -68,6 +68,11 @@ public:
     virtual void setStartTimeOffsetMs(int ms) { mStartTimeOffsetMs = ms; }
     virtual int32_t getStartTimeOffsetMs() const { return mStartTimeOffsetMs; }
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+    status_t setRecordingModeData(int recordingMode);
+    status_t setAuthorData(int author);
+#endif
+
 protected:
     virtual ~MPEG4Writer();
 
@@ -192,6 +197,11 @@ private:
 
     // HFR scale
     uint32_t mHFRRatio;
+
+#ifdef SAMSUNG_CAMERA_HARDWARE
+    int mAuthor;
+    int mRecordingMode;
+#endif
 
     void lock();
     void unlock();

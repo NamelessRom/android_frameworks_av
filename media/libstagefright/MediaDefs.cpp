@@ -91,5 +91,16 @@ const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
 const char *MEDIA_MIMETYPE_CONTAINER_VC1 = "video/vc1";
 const char *MEDIA_MIMETYPE_CONTAINER_HEVC = "video/hevc";
 const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG = "video/ffmpeg";
+#ifdef SAMSUNG_CAMERA_HARDWARE
+const char *MEDIA_MIMETYPE_CONTAINER_MKV = "video/mkv";
 
+//const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
+const char *MEDIA_MIMETYPE_VIDEO_WMV1 = "video/x-ms-wmv7";
+const char *MEDIA_MIMETYPE_VIDEO_WMV2 = "video/x-ms-wmv8";
+const char *MEDIA_MIMETYPE_VIDEO_WMV3 = "video/x-ms-wmv";
+const char *MEDIA_MIMETYPE_VIDEO_WVC1 = "video/wvc1";
+const char *MEDIA_MIMETYPE_VIDEO_MP43 = "video/mp43";
+const char *MEDIA_MIMETYPE_VIDEO_H263_SORENSON = "video/sorenson";
+//const char *MEDIA_MIMETYPE_VIDEO_RV = "video/rv";
+#endif
 }  // namespace android

@@ -323,6 +323,23 @@ sp<DataSource> DataSource::CreateFromURI(
     return source;
 }
 
+#ifdef SAMSUNG_CAMERA_HARDWARE
+// Needed for S6
+// static
+sp<DataSource> DataSource::CreateFromURI(
+        const sp<IMediaHTTPService> &httpService,
+        const char *uri,
+        const KeyedVector<String8, String8> *headers,
+        String8 *contentType,
+        HTTPBase *httpSource) {
+
+    sp<DataSource> source;
+
+    source = CreateFromURI(httpService, uri, headers, contentType, httpSource, false);
+    return source;
+}
+#endif
+
 sp<DataSource> DataSource::CreateMediaHTTP(const sp<IMediaHTTPService> &httpService) {
     if (httpService == NULL) {
         return NULL;
